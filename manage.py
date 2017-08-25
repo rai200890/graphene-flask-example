@@ -1,0 +1,30 @@
+from flask_script import (
+    Command,
+    Manager
+)
+from flask_migrate import (
+    Migrate,
+    MigrateCommand
+)
+
+from user_api.app import (
+    application,
+    db
+)
+from user_api import models
+
+
+migrate = Migrate(application, db)
+manager = Manager(application)
+manager.add_command("db", MigrateCommand)
+
+
+@manager.command
+def recreate_database():
+    "Recreate database"
+    db.drop_all()
+    db.create_all()
+
+
+if __name__ == "__main__":
+    manager.run()
