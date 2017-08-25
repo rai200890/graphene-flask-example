@@ -14,7 +14,7 @@ services:
       - 3000:3000
     volumes:
       - .:/usr/src
-    command: /bin/bash -c "python3 user_api/app.py"
+    command: /bin/bash -c "python3 run.py"
   db:
     container_name: user_api_db
     image: mysql:8.0.2

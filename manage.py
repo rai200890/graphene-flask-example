@@ -8,14 +8,14 @@ from flask_migrate import (
 )
 
 from user_api.app import (
-    application,
+    app,
     db
 )
 from user_api import models
 
 
-migrate = Migrate(application, db)
-manager = Manager(application)
+migrate = Migrate(app, db)
+manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 
 
