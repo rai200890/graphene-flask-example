@@ -19,7 +19,7 @@ def create_app():
     from user_api.schema import schema
     app.add_url_rule('/api/graphql', view_func=GraphQLView.as_view('graphql',
                                                                    schema=schema,
-                                                                   graphiql=app.config["DEBUG"],
+                                                                   graphiql=True,
                                                                    context={'session': db.session}))
 
     @app.route("/api/healthcheck")
