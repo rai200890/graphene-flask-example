@@ -1,8 +1,7 @@
 from decouple import config
 from flask import jsonify, Flask
-from sqlalchemy.exc import SQLAlchemyError
-from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
@@ -14,13 +13,13 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = config("SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = config("SQLALCHEMY_TRACK_MODIFICATIONS",
                                                           cast=bool, default=False)
-    app.config["SECRET_KEY"] = config("SECRET_KEY")
     db.init_app(app)
+    app.config["SECRET_KEY"] = config("SECRET_KEY")
     from user_api.schema import schema
-    app.add_url_rule('/api/graphql', view_func=GraphQLView.as_view('graphql',
+    app.add_url_rule("/api/graphql", view_func=GraphQLView.as_view("graphql",
                                                                    schema=schema,
-                                                                   graphiql=True,
-                                                                   context={'session': db.session}))
+                                                                   graphiql=app.config["DEBUG"],
+                                                                   context={"session": db.session}))
 
     @app.route("/api/healthcheck")
     def healthcheck():

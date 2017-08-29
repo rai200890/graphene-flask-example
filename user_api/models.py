@@ -8,8 +8,11 @@ class User(db.Model):
     email = db.Column(db.String(200), unique=True, index=True, nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=func.now())
     updated_on = db.Column(db.TIMESTAMP, server_default=func.now(), onupdate=func.now())
-    last_login_at = db.Column(db.TIMESTAMP, server_default=func.now())
     phones = db.relationship("Phone", back_populates="user")
+
+    @classmethod
+    def first(cls):
+        return None
 
 
 class Phone(db.Model):

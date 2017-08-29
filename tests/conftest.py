@@ -1,36 +1,33 @@
-from os import environ
-from datetime import timedelta
-
 import pytest
-
-from application import application as _application, db as _db
+from decouple import config
+from app import app as _app, db as _db
 
 
 def pytest_sessionstart(session):
-    _application.config["SQLALCHEMY_DATABASE_URI"] = environ.get("SQLALCHEMY_DATABASE_URI_TEST")
-    _application.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    _application.config["TESTING"] = True
-    _application.config["SECRET_KEY"] = "super-secret"
+    _app.config["SQLALCHEMY_DATABASE_URI"] = config("SQLALCHEMY_DATABASE_URI_TEST")
+    _app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    _app.config["TESTING"] = True
+    _app.config["SECRET_KEY"] = "super-secret"
     _db.drop_all()
     _db.create_all()
 
 
 @pytest.fixture(scope="session")
-def application(request):
-    ctx = _application.application_context()
+def app(request):
+    ctx = _app.app_context()
     ctx.push()
 
     def teardown():
         request.addfinalizer(teardown)
-    return _application
+    return _app
 
 
 @pytest.fixture(scope="session")
-def db(application, request):
+def db(app, request):
     def teardown():
         _db.drop_all()
 
-    _db.application = application
+    _db.app = app
 
     _db.create_all()
 
@@ -56,5 +53,5 @@ def session(db, request):
 
 
 @pytest.fixture
-def api_test_client(application):
-    return application.test_client()
+def api_test_client(app):
+    return app.test_client()

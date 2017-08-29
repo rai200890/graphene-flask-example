@@ -1,33 +1,39 @@
-import logging
 import graphene
 from graphene import relay
 from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
 
-from user_api.models import User as UserModel, Phone as PhoneModel
+from user_api.models import User, Phone
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-
-class User(SQLAlchemyObjectType):
+class UserType(SQLAlchemyObjectType):
     class Meta:
-        model = UserModel
+        model = User
+        interfaces = [relay.Node]
+    #
+    # @classmethod
+    # def get_node(cls, info, id):
+    #     node = User.query.get(id)
+    #     return node
+
+
+class PhoneType(SQLAlchemyObjectType):
+    class Meta:
+        model = Phone
         interfaces = [relay.Node]
 
-
-class Phone(SQLAlchemyObjectType):
-    class Meta:
-        model = PhoneModel
-        interfaces = [relay.Node]
+    @classmethod
+    def get_node(cls, info, id):
+        node = Phone.query.get(id)
+        return node
 
 
 class Query(graphene.ObjectType):
-    users = graphene.List(User, id=graphene.Int(), name=graphene.String())
+    users = graphene.List(UserType, id=graphene.Int(), name=graphene.String())
 
-    def resolve_users(self, args, context, info):
-        query = User.get_query(context).filter_by(**args)
-        return query.all()
+    def resolve_users(self, info, **args):
+        query = UserType.get_query(info).filter_by(**args)
+        result = query.all()
+        return result
 
 
 schema = graphene.Schema(query=Query)
