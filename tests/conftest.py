@@ -1,19 +1,11 @@
 import pytest
 from decouple import config
-from app import app as _app, db as _db
-
-
-def pytest_sessionstart(session):
-    _app.config["SQLALCHEMY_DATABASE_URI"] = config("SQLALCHEMY_DATABASE_URI_TEST")
-    _app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    _app.config["TESTING"] = True
-    _app.config["SECRET_KEY"] = "super-secret"
-    _db.drop_all()
-    _db.create_all()
+from user_api.app import app as _app, db as _db
 
 
 @pytest.fixture(scope="session")
 def app(request):
+    _app.config["SQLALCHEMY_DATABASE_URI"] = config("SQLALCHEMY_DATABASE_URI_TEST")
     ctx = _app.app_context()
     ctx.push()
 
@@ -22,7 +14,7 @@ def app(request):
     return _app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def db(app, request):
     def teardown():
         _db.drop_all()

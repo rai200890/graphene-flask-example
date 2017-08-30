@@ -1,39 +1,52 @@
 import graphene
+
 from graphene import relay
-from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
-
-from user_api.models import User, Phone
+from graphene_sqlalchemy import SQLAlchemyObjectType
 
 
-class UserType(SQLAlchemyObjectType):
+from .models import User, Phone
+
+
+class NodeInterface(graphene.Interface):
+
+    @classmethod
+    def get_node(cls, info, id):
+        node = cls._meta.model.query.get(id)
+        return node
+
+
+class UserType(SQLAlchemyObjectType, NodeInterface):
     class Meta:
         model = User
         interfaces = [relay.Node]
-    #
-    # @classmethod
-    # def get_node(cls, info, id):
-    #     node = User.query.get(id)
-    #     return node
 
 
-class PhoneType(SQLAlchemyObjectType):
+class UserConnection(graphene.Connection):
+    class Meta:
+        node = UserType
+
+
+class PhoneType(SQLAlchemyObjectType, NodeInterface):
     class Meta:
         model = Phone
         interfaces = [relay.Node]
 
-    @classmethod
-    def get_node(cls, info, id):
-        node = Phone.query.get(id)
-        return node
-
 
 class Query(graphene.ObjectType):
-    users = graphene.List(UserType, id=graphene.Int(), name=graphene.String())
+    user = relay.Node.Field(UserType)
+    users = relay.ConnectionField(UserConnection,
+                                  name=graphene.String(name="name_Istartswith"))
 
     def resolve_users(self, info, **args):
-        query = UserType.get_query(info).filter_by(**args)
-        result = query.all()
-        return result
+        query = UserType.get_query(info)
+        filters = {key: value for key, value in args.items()
+                   if key not in ["first", "before", "after", "last"]}
+        for key, value in filters.items():
+            field = getattr(User, key)
+            predicate = field.ilike("{}%".format(value))
+            query = query.filter(predicate)
+
+        return query.all()
 
 
 schema = graphene.Schema(query=Query)
