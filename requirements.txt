@@ -1,8 +1,8 @@
 Flask==0.11.1
 Flask-GraphQL==1.4.1
 SQLAlchemy-Utils==0.32.14
-graphql-core==2.0.dev20170801051721
-graphene==2.0.dev20170802065539
+graphql-core>=2.0.dev20170801051721
+graphene>=2.0.dev20170802065539
 graphene-sqlalchemy==2.0.dev2017073101
 gunicorn==19.6.0
 Flask-Migrate==2.0.0

@@ -1,8 +1,8 @@
 from decouple import config
 from flask import jsonify, Flask
-from flask_graphql import GraphQLView
 from flask_sqlalchemy import SQLAlchemy
 
+from user_api.views import UserGraphQLView
 
 db = SQLAlchemy()
 
@@ -17,10 +17,10 @@ def create_app():
     app.config["SECRET_KEY"] = config("SECRET_KEY")
     db.init_app(app)
     from user_api.schema import schema
-    app.add_url_rule("/api/graphql", view_func=GraphQLView.as_view("graphql",
-                                                                   schema=schema,
-                                                                   graphiql=app.config["DEBUG"],
-                                                                   context={"session": db.session}))
+    app.add_url_rule("/api/graphql", view_func=UserGraphQLView.as_view("graphql",
+                                                                       schema=schema,
+                                                                       graphiql=app.config["DEBUG"],
+                                                                       context={"session": db.session}))
 
     @app.route("/api/healthcheck")
     def healthcheck():

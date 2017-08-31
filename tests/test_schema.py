@@ -143,7 +143,49 @@ def non_empty_query_result(request):
     return request.getfixturevalue(request.param[0]), request.getfixturevalue(request.param[1])
 
 
-@pytest.mark.django_db
+@pytest.fixture
+def user_mutation_without_phone():
+    return """mutation MyMutation{
+  createUser(input:{name: "John", lastName: "Doe", email: "john.doe@email.com"}){
+    user{
+      name
+      phones {
+        edges {
+          node{
+            ddd
+            number
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+
+@pytest.fixture
+def user_mutation_with_phones():
+    return """mutation MyMutation{
+  createUser(input:{
+    name: "John", lastName: "Doe", email: "john.doe@email.com",
+    phones: [{ddd: "55", number: "123456789"}]
+    }){
+    user{
+      name
+      phones {
+        edges {
+          node{
+            ddd
+            number
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+
 def test_empty_query_result(empty_query_result):
     query, expected_result = empty_query_result
     result = schema.execute(query)
@@ -151,9 +193,22 @@ def test_empty_query_result(empty_query_result):
     assert result.data == expected_result
 
 
-@pytest.mark.django_db
 def test_nonempty_query_result(non_empty_query_result):
     query, expected_result = non_empty_query_result
     result = schema.execute(query)
 
     assert result.data == expected_result
+
+
+@pytest.fixture(params=[
+    ("user_mutation_without_phone", None),
+    ("user_mutation_with_phones", None),
+])
+def valid_mutation(request):
+    return request.getfixturevalue(request.param[0])
+
+
+def test_mutation(valid_mutation):
+    result = schema.execute(valid_mutation)
+
+    assert result.data
