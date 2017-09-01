@@ -1,4 +1,5 @@
 from sqlalchemy.sql import func
+
 from .app import db
 
 
@@ -21,19 +22,18 @@ class User(db.Model):
 
     @classmethod
     def create(cls, **params):
-        connection = db.engine.connect()
-        transaction = connection.begin()
+        session = db.session()
         try:
             phones = []
             if params.get("phones"):
                 phones = params.pop("phones")
             user = User(**params)
-            db.session.add(user)
+            session.add(user)
             for phone in phones:
                 phone["user"] = user
-                db.session.add(Phone(**phone))
-            transaction.commit()
+                session.add(Phone(**phone))
+            session.commit()
             return user
         except Exception as e:
-            transaction.rollback()
+            session.rollback()
             raise e

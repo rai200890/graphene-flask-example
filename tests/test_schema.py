@@ -146,7 +146,7 @@ def non_empty_query_result(request):
 @pytest.fixture
 def user_mutation_without_phone():
     return """mutation MyMutation{
-  createUser(input:{name: "John", lastName: "Doe", email: "john.doe@email.com"}){
+  createUser(input:{name: "Johnny", lastName: "Doe", email: "john.doe@email.com"}){
     user{
       name
       phones {
@@ -167,8 +167,8 @@ def user_mutation_without_phone():
 def user_mutation_with_phones():
     return """mutation MyMutation{
   createUser(input:{
-    name: "John", lastName: "Doe", email: "john.doe@email.com",
-    phones: [{ddd: "55", number: "123456789"}]
+    name: "Joey", lastName: "Doe", email: "joey.doe@email.com",
+    phones: [{ddd: "55", number: "123456780"}]
     }){
     user{
       name
@@ -200,15 +200,20 @@ def test_nonempty_query_result(non_empty_query_result):
     assert result.data == expected_result
 
 
-@pytest.fixture(params=[
-    ("user_mutation_without_phone", None),
-    ("user_mutation_with_phones", None),
-])
-def valid_mutation(request):
-    return request.getfixturevalue(request.param[0])
+def test_mutation_without_phone(user_mutation_without_phone):
+    result = schema.execute(user_mutation_without_phone)
+
+    user = User.query.first()
+
+    assert result.data["createUser"]["user"]["name"] == user.name
+    assert result.data["createUser"]["user"]["phones"]["edges"] == []
 
 
-def test_mutation(valid_mutation):
-    result = schema.execute(valid_mutation)
+def test_mutation_with_phones(user_mutation_with_phones):
+    result = schema.execute(user_mutation_with_phones)
 
-    assert result.data
+    user = User.query.all()[-1]
+
+    assert result.data["createUser"]["user"]["name"] == user.name
+    assert result.data["createUser"]["user"]["phones"]["edges"][0]["node"]["ddd"] == user.phones[0].ddd
+    assert result.data["createUser"]["user"]["phones"]["edges"][0]["node"]["number"] == user.phones[0].number
