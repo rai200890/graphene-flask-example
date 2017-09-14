@@ -1,6 +1,6 @@
 import pytest
 
-from user_api.schema import schema
+from user_api.graphql.schema import schema
 from user_api.models import User
 
 
@@ -146,7 +146,7 @@ def non_empty_query_result(request):
 @pytest.fixture
 def user_mutation_without_phone():
     return """mutation MyMutation{
-  createUser(input:{name: "Johnny", lastName: "Doe", email: "john.doe@email.com"}){
+  createUser(input:{name: "Johnny", lastName: "Doe", email: "johnny.doe@email.com"}){
     user{
       name
       phones {
@@ -212,7 +212,7 @@ def test_mutation_without_phone(user_mutation_without_phone):
 def test_mutation_with_phones(user_mutation_with_phones):
     result = schema.execute(user_mutation_with_phones)
 
-    user = User.query.all()[-1]
+    user = User.query.all()[0]
 
     assert result.data["createUser"]["user"]["name"] == user.name
     assert result.data["createUser"]["user"]["phones"]["edges"][0]["node"]["ddd"] == user.phones[0].ddd

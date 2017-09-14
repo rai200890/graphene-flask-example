@@ -5,10 +5,11 @@ from .app import db
 
 class Phone(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    ddd = db.Column(db.String(2), index=True, unique=True, nullable=False)
-    number = db.Column(db.String(9), index=True, unique=True, nullable=False)
+    ddd = db.Column(db.String(2), index=True, nullable=False)
+    number = db.Column(db.String(9), index=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
     user = db.relationship("User", back_populates="phones")
+    db.UniqueConstraint("ddd", "number", "user_id", name="ux_phones_ddd_number_user_id")
 
 
 class User(db.Model):
@@ -29,9 +30,11 @@ class User(db.Model):
                 phones = params.pop("phones")
             user = User(**params)
             session.add(user)
+            session.flush()
             for phone in phones:
                 phone["user"] = user
                 session.add(Phone(**phone))
+                session.flush()
             session.commit()
             return user
         except Exception as e:
