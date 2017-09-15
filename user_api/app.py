@@ -1,10 +1,22 @@
 from decouple import config
-from flask import jsonify, Flask
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_graphql import GraphQLView
 
+from user_api.routes.error_handlers import register_handlers
+
 
 db = SQLAlchemy()
+
+
+def register_routes(app):
+    from user_api.graphql.schema import schema
+    from user_api.routes.healthcheck import HealthcheckView
+    app.add_url_rule("/api/graphql", view_func=GraphQLView.as_view("graphql",
+                                                                   schema=schema,
+                                                                   graphiql=app.config["DEBUG"],
+                                                                   context={"session": db.session}))
+    app.add_url_rule("/api/healthcheck", view_func=HealthcheckView)
 
 
 def create_app():
@@ -17,28 +29,10 @@ def create_app():
                                                           default=False)
     app.config["SECRET_KEY"] = config("SECRET_KEY")
     db.init_app(app)
-    from user_api.graphql.schema import schema
-    app.add_url_rule("/api/graphql", view_func=GraphQLView.as_view("graphql",
-                                                                   schema=schema,
-                                                                   graphiql=app.config["DEBUG"],
-                                                                   context={"session": db.session}))
 
-    @app.route("/api/healthcheck")
-    def healthcheck():
-        try:
-            db.engine.execute("SELECT 1;").fetchone()
-            return jsonify({"status": "OK"})
-        except:
-            return jsonify({"status": "DOWN"})
+    register_routes(app)
+    register_handlers(app)
 
-    @app.errorhandler(404)
-    def handle_not_found(err):
-        return jsonify({"mensagem": "Não encontrado"}), 404
-
-    @app.errorhandler(422)
-    def handle_unprocessable_entity(err):
-        messages = ["{} {}".format(key, ",".join(value)) for key, value in err.data["messages"].items()]
-        return jsonify({"mensagem": "; ".join(messages)}), 400
     return app
 
 
