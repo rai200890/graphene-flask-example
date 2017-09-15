@@ -23,7 +23,7 @@ class User(db.Model):
 
     @classmethod
     def create(cls, **params):
-        session = db.session()
+        session = db.session
         try:
             phones = []
             if params.get("phones"):
@@ -37,6 +37,5 @@ class User(db.Model):
                 session.flush()
             session.commit()
             return user
-        except Exception as e:
+        except:
             session.rollback()
-            raise e
