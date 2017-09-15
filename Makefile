@@ -1,5 +1,5 @@
 up:
-	docker-compose run --service-ports --name user_api_flask_web --rm web
+	docker-compose run --service-ports --name user_api_flask_web web --rm
 
 test:
 	docker exec -it user_api_flask_web pytest tests
