@@ -125,24 +125,6 @@ def filter_by_name_istarts_query_result(user_1):
     }
 
 
-@pytest.fixture(params=[
-    ("filter_query", "filter_query_empty_result"),
-    ("filter_by_id_query", "filter_by_id_query_result"),
-    ("filter_by_name_istarts_query", "filter_query_empty_result"),
-    ("paging_query", "filter_query_empty_result")
-])
-def empty_query_result(request):
-    return request.getfixturevalue(request.param[0]), request.getfixturevalue(request.param[1])
-
-
-@pytest.fixture(params=[
-    ("filter_query", "filter_query_non_empty_result"),
-    ("filter_by_name_istarts_query", "filter_by_name_istarts_query_result")
-])
-def non_empty_query_result(request):
-    return request.getfixturevalue(request.param[0]), request.getfixturevalue(request.param[1])
-
-
 @pytest.fixture
 def user_mutation_without_phone():
     return """mutation MyMutation{
@@ -186,34 +168,66 @@ def user_mutation_with_phones():
 """
 
 
-def test_empty_query_result(empty_query_result):
-    query, expected_result = empty_query_result
+@pytest.fixture
+def user_mutation_without_phone_result():
+    return {
+        "createUser": {
+            "user": {
+                "name": "Johnny",
+                "phones": {
+                    "edges": []
+                }
+            }
+        }
+    }
+
+
+@pytest.fixture
+def user_mutation_with_phones_result():
+    return {
+        "createUser": {
+            "user": {
+                "name": "Joey",
+                "phones": {
+                    "edges": [
+                        {
+                            "node": {
+                                "ddd": "55",
+                                "number": "123456780"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+
+@pytest.fixture
+def query(request):
+    return request.getfixturevalue(request.param)
+
+
+@pytest.fixture
+def expected_result(request):
+    return request.getfixturevalue(request.param)
+
+
+# O parâmetro indirect permite que seja chamada uma fixture dentro do parametrize
+# indirect=True é análogo a chamar indirect para todos os parâmetros da lista,
+# neste caso indirect=["query", "expected_result"]
+# https://hackebrot.github.io/pytest-tricks/mark_parametrize_with_indirect/
+@pytest.mark.parametrize("query, expected_result", [
+    ("filter_query", "filter_query_empty_result"),
+    ("filter_by_id_query", "filter_by_id_query_result"),
+    ("filter_by_name_istarts_query", "filter_query_empty_result"),
+    ("paging_query", "filter_query_empty_result"),
+    ("filter_query", "filter_query_non_empty_result"),
+    ("filter_by_name_istarts_query", "filter_by_name_istarts_query_result"),
+    ("user_mutation_without_phone", "user_mutation_without_phone_result"),
+    ("user_mutation_with_phones", "user_mutation_with_phones_result")
+], indirect=True)
+def test_query_result(query, expected_result):
     result = schema.execute(query)
 
     assert result.data == expected_result
-
-
-def test_nonempty_query_result(non_empty_query_result):
-    query, expected_result = non_empty_query_result
-    result = schema.execute(query)
-
-    assert result.data == expected_result
-
-
-def test_mutation_without_phone(user_mutation_without_phone):
-    result = schema.execute(user_mutation_without_phone)
-
-    user = User.query.first()
-
-    assert result.data["createUser"]["user"]["name"] == user.name
-    assert result.data["createUser"]["user"]["phones"]["edges"] == []
-
-
-def test_mutation_with_phones(user_mutation_with_phones):
-    result = schema.execute(user_mutation_with_phones)
-
-    user = User.query.all()[0]
-
-    assert result.data["createUser"]["user"]["name"] == user.name
-    assert result.data["createUser"]["user"]["phones"]["edges"][0]["node"]["ddd"] == user.phones[0].ddd
-    assert result.data["createUser"]["user"]["phones"]["edges"][0]["node"]["number"] == user.phones[0].number
