@@ -60,6 +60,7 @@ class CreateUser(relay.ClientIDMutation):
             return CreateUser(user=user)
         except Exception as e:
             logger.error(e)
+            raise e
 
 
 class Mutation(graphene.ObjectType):

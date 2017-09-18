@@ -25,17 +25,14 @@ class User(db.Model):
     def create(cls, **params):
         session = db.session
         try:
-            phones = []
-            if params.get("phones"):
-                phones = params.pop("phones")
+            phones = params.pop("phones", [])
             user = User(**params)
             session.add(user)
-            session.flush()
             for phone in phones:
                 phone["user"] = user
                 session.add(Phone(**phone))
-                session.flush()
             session.commit()
             return user
-        except:
+        except Exception as e:
             session.rollback()
+            raise e

@@ -6,21 +6,23 @@ from user_api.models import User
 
 @pytest.fixture
 def user_1(session):
+    transaction = session.begin_nested()
     user = User(name="John",
                 last_name="Doe",
                 email="john.doe@email.com")
     session.add(user)
-    session.commit()
+    transaction.commit()
     return user
 
 
 @pytest.fixture
 def user_2(session):
+    transaction = session.begin_nested()
     user = User(name="Joe",
                 last_name="Doe",
                 email="joe.doe@email.com")
-    session.add(user)
-    session.commit()
+    session.merge(user)
+    transaction.commit()
     return user
 
 

@@ -1,7 +1,7 @@
 # coding: utf-8
 import pytest
 from decouple import config
-from sqlalchemy import inspect
+from sqlalchemy import event
 
 from user_api.app import app as _app, db as _db
 
@@ -21,7 +21,7 @@ def app(request):
 
 
 # O banco de dados é recriado antes da execução de cada caso de teste
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def db(app, request):
     def teardown():
         _db.drop_all()
@@ -33,22 +33,21 @@ def db(app, request):
     return _db
 
 
-# Remote todos os registros de todas as tabelas do banco de dados antes de executar cada caso de teste
-@pytest.fixture(autouse=True)
-def clear_db(db, session, request):
-    for table in reversed(inspect(db.engine).get_table_names()):
-        session.execute("DELETE FROM {}".format(table))
-
-
 # Inpirado em: http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html
-@pytest.fixture
-def session(db, request, mocker):
+@pytest.fixture(scope="function", autouse=True)
+def session(db, request):
     connection = db.engine.connect()
     transaction = connection.begin()
     session = db.create_scoped_session(options={"bind": connection})
+    session.begin(subtransactions=True)
+
     db.session = session
 
-    mocker.patch.multiple("user_api.models", db=db)
+    @event.listens_for(session, "after_transaction_end")
+    def restart_savepoint(session, transaction):
+        if transaction.nested and not transaction._parent.nested:
+            session.expire_all()
+            session.begin_nested()
 
     def teardown():
         transaction.rollback()
