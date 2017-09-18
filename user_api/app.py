@@ -16,7 +16,7 @@ def register_routes(app):
                                                                    schema=schema,
                                                                    graphiql=app.config["DEBUG"],
                                                                    context={"session": db.session}))
-    app.add_url_rule("/api/healthcheck", view_func=HealthcheckView)
+    app.add_url_rule("/api/healthcheck", view_func=HealthcheckView.as_view("healthcheck"))
 
 
 def create_app():

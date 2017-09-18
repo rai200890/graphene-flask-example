@@ -4,17 +4,29 @@ from user_api.graphql.resolvers import PredicateParser
 
 
 @pytest.fixture
-def parser():
-    return PredicateParser("name_Istartswith")
+def parser(request):
+    return PredicateParser(request.param)
 
 
-def test_field_name(parser):
-    return parser.field_name == "name"
+@pytest.mark.parametrize("parser, expected", [
+    ("name_Istartswith", "name"),
+    ("last_name_startswith", "last_name")
+], indirect=["parser"])
+def test_field_name(parser, expected):
+    return parser.field_name == expected
 
 
-def test_insensitive_case(parser):
-    return parser.insensitive_case is True
+@pytest.mark.parametrize("parser, expected", [
+    ("name_Istartswith", False),
+    ("name_startswith", True)
+], indirect=["parser"])
+def test_sensitive_case(parser, expected):
+    return parser.sensitive_case is expected
 
 
-def test_matcher(parser):
-    return parser.matcher == "startswith"
+@pytest.mark.parametrize("parser, expected", [
+    ("name_Istartswith", "startswith"),
+    ("last_name_endswith", "endswith")
+], indirect=["parser"])
+def test_matcher(parser, expected):
+    return parser.matcher == expected

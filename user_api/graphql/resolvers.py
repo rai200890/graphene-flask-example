@@ -6,8 +6,8 @@ from graphene import relay
 class PredicateParser(object):
 
     def __init__(self, predicate):
-        field_name, insensitive_case, matcher = re.match(r"(.*)_(I?)(.*)", predicate).groups()
-        self.insensitive_case = insensitive_case is None
+        field_name, insensitive_case, matcher = re.match(r"(.+)_([Ii]?)(.+)", predicate).groups()
+        self.sensitive_case = not insensitive_case
         self.field_name = field_name.lower()
         self.matcher = matcher.lower()
 
@@ -29,10 +29,7 @@ class FilterPredicate(object):
 
     @property
     def operator(self):
-        operator = "like"
-        if self.parser.insensitive_case:
-            operator = "ilike"
-        return operator
+        return "like" if self.parser.sensitive_case else "ilike"
 
     @property
     def template(self):

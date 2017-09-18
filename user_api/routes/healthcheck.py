@@ -9,6 +9,6 @@ class HealthcheckView(MethodView):
     def get(self):
         try:
             db.engine.execute("SELECT 1;").fetchone()
-            return jsonify({"status": "OK"})
+            return jsonify({"status": "UP"}), 200
         except:
-            return jsonify({"status": "DOWN"})
+            return jsonify({"status": "DOWN"}), 500

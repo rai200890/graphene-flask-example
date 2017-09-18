@@ -21,7 +21,7 @@ def user_2(session):
     user = User(name="Joe",
                 last_name="Doe",
                 email="joe.doe@email.com")
-    session.merge(user)
+    session.add(user)
     transaction.commit()
     return user
 

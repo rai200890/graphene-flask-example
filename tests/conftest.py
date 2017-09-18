@@ -34,8 +34,10 @@ def db(app, request):
 
 
 # Inpirado em: http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html
+# Devido a um bug no driver do SQLite(pysqlite) com relação a sub transações, o banco de teste precisa ser mysql
+# http://docs.sqlalchemy.org/en/latest/dialects/sqlite.html
 @pytest.fixture(scope="function", autouse=True)
-def session(db, request):
+def session(db, request, mocker):
     connection = db.engine.connect()
     transaction = connection.begin()
     session = db.create_scoped_session(options={"bind": connection})

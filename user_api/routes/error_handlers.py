@@ -2,12 +2,12 @@ from flask import jsonify
 
 
 def handle_not_found(err):
-    return jsonify({"mensagem": "Não encontrado"}), 404
+    return jsonify({"errors": ["resource not found"]}), 404
 
 
-def handle_unprocessable_entity(err):
+def handle_bad_request(err):
     messages = ["{} {}".format(key, ",".join(value)) for key, value in err.data["messages"].items()]
-    return jsonify({"mensagem": "; ".join(messages)}), 400
+    return jsonify({"errors": messages}), 400
 
 
 def register_handlers(app):
@@ -15,6 +15,6 @@ def register_handlers(app):
     def handle_404(err):
         return handle_not_found(err)
 
-    @app.errorhandler(422)
-    def handle_422(err):
-        return handle_unprocessable_entity(err)
+    @app.errorhandler(400)
+    def handle_400(err):
+        return handle_bad_request(err)
