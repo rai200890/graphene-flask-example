@@ -1,11 +1,14 @@
-up:
-	docker-compose run --service-ports --name user_api_flask_web web --rm
+install:
+	pip install -r requirements-dev.txt
+
+run:
+	python3 run.py
 
 test:
-	docker exec -it user_api_flask_web pytest tests
+	pytest
 
-exec-db:
-	docker exec -it user_api_flask_db bash
+clear:
+	find . -name "*.pyc" -exec rm -rf {} \;
 
-exec-web:
-	docker exec -it user_api_flask_web bash
+lint:
+	flake8 tests user_api

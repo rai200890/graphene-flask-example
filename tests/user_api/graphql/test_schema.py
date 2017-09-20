@@ -1,3 +1,4 @@
+# coding: utf-8
 import pytest
 
 from user_api.graphql.schema import schema
