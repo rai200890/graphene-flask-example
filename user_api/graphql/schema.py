@@ -56,11 +56,9 @@ class CreateUser(relay.ClientIDMutation):
     def mutate_and_get_payload(cls, root, info, **input):
         try:
             user = User.create(**input)
-            logger.info("User {} created successfully".format(user.id))
             return CreateUser(user=user)
         except Exception as e:
             logger.error(e)
-            raise e
 
 
 class Mutation(graphene.ObjectType):

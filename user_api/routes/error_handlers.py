@@ -1,4 +1,8 @@
+import logging
+
 from flask import jsonify
+
+logger = logging.getLogger("api")
 
 
 def handle_not_found(err):
@@ -6,6 +10,7 @@ def handle_not_found(err):
 
 
 def handle_bad_request(err):
+    logger.error(err)
     messages = ["{} {}".format(key, ",".join(value)) for key, value in err.data["messages"].items()]
     return jsonify({"errors": messages}), 400
 

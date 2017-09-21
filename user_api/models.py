@@ -1,6 +1,11 @@
+import logging
+
 from sqlalchemy.sql import func
 
 from .app import db
+
+
+logger = logging.getLogger("api")
 
 
 class Phone(db.Model):
@@ -32,7 +37,8 @@ class User(db.Model):
                 phone["user"] = user
                 session.add(Phone(**phone))
             session.commit()
+            logger.info("User {} created successfully".format(user.id))
             return user
         except Exception as e:
             session.rollback()
-            raise e
+            logger.error("{} - User couldn't be created".format(e))
