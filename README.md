@@ -1,10 +1,10 @@
-#graphene-flask-example
+# graphene-flask-example
 
 Exemplo de uma API [GraphQL](http://graphql.org/) usando [Graphene](http://docs.graphene-python.org/en/latest/quickstart/), [Flask GraphQL](https://github.com/graphql-python/flask-graphql) e [Graphene-SQLAlchemy](http://docs.graphene-python.org/projects/sqlalchemy/en/latest/).
 
-##Instalação
+## Instalação
 
-###Virtualenv
+### Virtualenv
 
 [Instalação](https://virtualenv.pypa.io/en/stable/installation/)
 
@@ -15,7 +15,7 @@ Exemplo de uma API [GraphQL](http://graphql.org/) usando [Graphene](http://docs.
   pip install -r requirements-dev.txt
 ```
 
-###Tox
+### Tox
 
 [Instalação](https://tox.readthedocs.io/en/latest/)
 
@@ -23,7 +23,7 @@ Exemplo de uma API [GraphQL](http://graphql.org/) usando [Graphene](http://docs.
 tox
 ```
 
-###Docker-Compose
+### Docker-Compose
 
 [Instalação](https://docs.docker.com/compose/install/)
 
@@ -34,17 +34,17 @@ docker-compose exec web bash #abre o terminal do container web
 docker-compose exec db mysql #abre o CLI do mysql no container db
 ```
 
-##Configuração do ambiente local
+## Configuração do ambiente local
 
 Crie um arquivo local .env baseado no arquivo .env.sample.
 
-##Execução do servidor local
+## Execução do servidor local
 
 ```
   python run.py #executa o servidor local na porta 3000
 ```
 
-##Versionamento do banco de dados
+## Versionamento do banco de dados
 
 A aplicação usa o [Flask-Migrate](https://github.com/miguelgrinberg/Flask-Migrate) para fazer o versionamento do banco de dados.
 
@@ -62,7 +62,7 @@ python manage.py db migrate #cria migração caso haja mudança no schema do ban
 python manage.py db upgrade #executa as migrações do banco de dados
 ```
 
-###Rotas
+### Rotas
 
 ```
 
@@ -72,13 +72,13 @@ GET /api/graphql
 
 ```
 
-##Execução dos testes unitários
+## Execução dos testes unitários
 
 ```
 pytest
 ```
 
-###Linter
+## Linter
 
 ```
 flake8 tests user_api
